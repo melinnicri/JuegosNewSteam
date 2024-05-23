@@ -1,0 +1,9 @@
+fastapi
+numpy
+pandas
+uvicorn
+importlib
+parquet
+pyarrow
+fastparquet
+scikit-learn
