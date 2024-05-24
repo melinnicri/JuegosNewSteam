@@ -7,6 +7,7 @@ import parquet
 
 # Usar datasets desde parquet (consultas)
 data_dev = pd.read_parquet("data_dev.parquet")
+data_user = pd.read_parquet("data_user.parquet")
 
 
 # Se instancia la aplicación
@@ -25,7 +26,7 @@ async def about():
 
 
 # Primera consulta:
-@app.get("/developer_info/({dev})")
+@app.get("/developerinfo/({dev})")
 def developer_info(dev: str):
     ''' Se ingresa el Desarrollador y la función retorna el Año, Cantidad de Items y Cantidad de Free en % '''
 
@@ -51,3 +52,58 @@ def developer_info(dev: str):
             f"% Free": round(porcentaje_free.get(year, 0), 1)
         }
     return developer_dict
+
+
+# Segunda consulta:
+@app.get("/userdata/({user_id})")
+def UserData(User_id: str) -> dict:
+    ''' Se ingresa el Usuario por id y la función retorna el Cantidad de dinero gastado, 
+    Porcentaje de recomendación y Cantidad de Items '''
+    
+    df_user_specific = data_user[data_user["user_id"] == User_id]
+
+    # Handle empty DataFrame gracefully
+    if df_user_specific.empty:
+        return {
+            "Cantidad dinero gastado": None,
+            "% de Recomendación": None,
+            "Cantidad de items": None
+        }
+
+    total_dinero_por_usuario = df_user_specific.groupby("user_id")["price"].sum()
+    user_grouped = (
+        data_user.groupby("user_id")["recommend"]
+        .apply(lambda x: (x == True).mean() * 100)
+        .reset_index(name="recommend_true_porcentaje")
+    )
+    user_counts = (
+        data_user.groupby("user_id")
+        .size()
+        .to_frame(name="items_count")
+        .reset_index()
+    )
+
+    # Use try-except for potential index errors
+    try:
+        total_spent = total_dinero_por_usuario.iloc[0]
+    except IndexError:
+        total_spent = None
+
+    try:
+        recommend_percentage = user_grouped[user_grouped["user_id"] == User_id]["recommend_true_porcentaje"].iloc[0]
+    except IndexError:
+        recommend_percentage = None
+
+    try:
+        items_count = user_counts[user_counts["user_id"] == User_id]["items_count"].iloc[0]
+    except IndexError:
+        items_count = None
+
+    output = {
+        "Usuario": User_id,
+        "Cantidad dinero gastado en USD": total_spent,
+        "% de Recomendación": f"{recommend_percentage:.1f}",
+        "Cantidad de items": items_count
+    }
+
+    return output
