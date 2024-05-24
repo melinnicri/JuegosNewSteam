@@ -5,9 +5,20 @@ import pyarrow
 import fastparquet
 import parquet
 
+import sklearn as sk
+from sklearn.metrics.pairwise import cosine_similarity
+import operator
+from sklearn.preprocessing import StandardScaler
+import scipy.sparse as sp
+
+from sklearn.feature_extraction.text import CountVectorizer
+
 # Usar datasets desde parquet (consultas)
 data_dev = pd.read_parquet("data_dev.parquet")
 data_user = pd.read_parquet("data_user.parquet")
+piv_table_norm = pd.read_parquet("piv_table_norm.parquet")
+df_user_simil =pd.read_parquet("df_user_simil.parquet")
+cosine_sim_df = pd.read_parquet("cosine_sim_df")
 
 
 # Se instancia la aplicación
@@ -102,8 +113,56 @@ def UserData(User_id: str) -> dict:
     output = {
         "Usuario": User_id,
         "Cantidad dinero gastado en USD": total_spent,
-        "% de Recomendación": f"{recommend_percentage:.1f}",
+        "Porc de Recomendación": f"{recommend_percentage:.1f}",
         "Cantidad de items": items_count
     }
 
     return output
+
+
+
+
+# ML: RECOMENDACIÓN USER-ITEM:
+
+@app.get("/similaruserrecs/({user})")
+def similar_user_recs(user):
+  
+    '''Los 5 juegos más recomendados similares recomendados por usuario...'''
+    # Se verifica si el usuario está presente en las columnas de piv_table_norm
+    if user not in df_user_simil.columns:
+        return {'message': 'El Usuario no tiene datos disponibles {}'.format(user)}
+
+    # Se obtienen los usuarios más similares 
+    sim_users = df_user_simil.sort_values(by=user, ascending=False).index[1:11]
+
+    best = []  
+    most_common = {}  
+
+    # Por cada usuario similar, encuentra el juego mejor calificado y lo agrega a la lista 'best'
+    for i in sim_users:
+        max_score = piv_table_norm.loc[:, i].max()
+        best.append(piv_table_norm[piv_table_norm.loc[:, i] == max_score].index.tolist())
+
+    # Se cuenta cuántas veces se recomienda cada juego
+    for i in range(len(best)):
+        for j in best[i]:
+            if j in most_common:
+                most_common[j] += 1
+            else:
+                most_common[j] = 1
+
+    # Se ordenan los juegos de mayor recomendación
+    sorted_list = sorted(most_common.items(), key=lambda x: x[1], reverse=True)
+
+    return dict(sorted_list[:5])
+
+
+
+# RECOMENDACIÓN ITEM-ITEM:
+
+@app.get("/getsimilaritems/({item_id})")
+def get_similar_items(item_id, top_n=5):
+    ''' La función para obtener el top N=5 de items similares al introducido por id de juego'''
+
+    similar_items = cosine_sim_df[item_id].sort_values(ascending=False).head(top_n + 1).iloc[1:]
+    return similar_items
