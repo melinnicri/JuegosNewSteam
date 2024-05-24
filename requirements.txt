@@ -7,3 +7,6 @@ parquet
 pyarrow
 fastparquet
 scikit-learn
+scipy
+
+
