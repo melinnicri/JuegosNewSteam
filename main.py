@@ -18,7 +18,7 @@ data_dev = pd.read_parquet("data_dev.parquet")
 data_user = pd.read_parquet("data_user.parquet")
 piv_table_norm = pd.read_parquet("piv_table_norm.parquet")
 df_user_simil =pd.read_parquet("df_user_simil.parquet")
-cosine_sim_df = pd.read_parquet("cosine_sim_df")
+cosine_sim_df = pd.read_parquet("cosine_sim_df.parquet")
 
 
 # Se instancia la aplicación
