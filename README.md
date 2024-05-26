@@ -46,7 +46,7 @@ Los 3 archivos originales de la Base de datos y comprimidos ("steam_games.json.g
 3) ["reviews.ipynb"](https://github.com/melinnicri/JuegosNewSteam/blob/main/Archivos_tratados/reviews.ipynb) (no se guardó Third_Users.csv)
 Para armar las combinaciones para las posteriores consultas, se hicieron nuevas dataframes y en la carpeta “Combinaciones”, se encuentra el notebook:
 
-4) ["combinaciones.ipynb"] (https://github.com/melinnicri/JuegosNewSteam/blob/main/Combinaciones/combinaciones.ipynb); los archivos .csv ("df_unido_1.csv", "df_unido_2.csv", "df_unido_3.csv", "df_unido_4.csv", "df_unido_5.csv"; para ML: "df_unido_ML01.csv", "df_unido_ML02.csv") no se subieron por el gran tamaño.
+4) ["combinaciones.ipynb"](https://github.com/melinnicri/JuegosNewSteam/blob/main/Combinaciones/combinaciones.ipynb); los archivos .csv ("df_unido_1.csv", "df_unido_2.csv", "df_unido_3.csv", "df_unido_4.csv", "df_unido_5.csv"; para ML: "df_unido_ML01.csv", "df_unido_ML02.csv") no se subieron por el gran tamaño.
 
 5) Las consultas que se propones son las siguientes y se encuentran en la carpeta “Consultas”, con 2 notebooks [“consultas.ipynb”](https://github.com/melinnicri/JuegosNewSteam/blob/main/Consultas/consultas.ipynb) y [“ML_separado.ipynb”:](https://github.com/melinnicri/JuegosNewSteam/blob/main/Consultas/ML_separado.ipynb)
 *Para las APIs se subieron solamente los archivos comprimidos y necesarios por Render, en parquet, porque la memoria es poca.
