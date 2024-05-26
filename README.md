@@ -122,7 +122,7 @@ Si es un sistema de recomendación user-item:
 - def recomendacion_usuario(id de usuario): Ingresando el id de un usuario, deberíamos recibir una lista con 5 juegos recomendados para dicho usuario. 
 
 
-API: https://dashboard.render.com/web/srv-cmcvkb821fec73cv39f0 (Advertencia: funcionan 2 XD):
+API: [https://dashboard.render.com/web/srv-cmcvkb821fec73cv39f0](https://primer-proyecto-apis.onrender.com/) (Advertencia: funcionan 2 XD):
 Datos para ensayar en la API:
 
 Los que sí funcionan, son:
