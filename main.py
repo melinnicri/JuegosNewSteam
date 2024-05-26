@@ -17,6 +17,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 data_dev = pd.read_parquet("data_dev.parquet")
 data_user = pd.read_parquet("data_user.parquet")
 data_gen_final = pd.read_parquet("data_gen_final.parquet")
+data_best_final = pd.read_parquet("data_best_final.parquet")
 piv_table_norm = pd.read_parquet("piv_table_norm.parquet")
 df_user_simil =pd.read_parquet("df_user_simil.parquet")
 cosine_sim_df = pd.read_parquet("cosine_sim_df.parquet")
@@ -89,7 +90,7 @@ def UserData(User_id: str) -> dict:
         .reset_index()
     )
 
-    # Use try-except for potential index errors
+    # Utilice try-except para posibles errores de índice:
     try:
         total_spent = total_dinero_por_usuario.iloc[0]
     except IndexError:
@@ -161,13 +162,37 @@ def UserForGenre(genero: str):
 
 
 # Cuarta Consulta:
+@app.get("/topdeveloper/({year_demo})")
+def TopDeveloper(year_demo: int): 
+    
+    ''' Se ingresa el Año y la función entrega el top 3 de desarrolladores con más recomendaciones por usuario '''
 
+    # Se filtra el DataFrame para el año dado
+    year_data = data_best_final[(data_best_final["year_soli"] == year_demo) & (data_best_final["sentiment_analysis"] == 2)]
+
+    # Se obtienen los 3 principales desarrolladores con más juegos recomendados por usuarios
+    top_developers = year_data.groupby("developer").size().nlargest(3)
+
+    # Se construye el diccionario con el resultado
+    result_desarr = {"Puesto 1": top_developers.index[0]}, {"Puesto 2": top_developers.index[1]}, {"Puesto 3": top_developers.index[2]}
+
+    return result_desarr
 
 
 
 # Quinta Consulta:
+@app.get("/develreviewsanalys/({desarrolladorsent})")
+def devel_reviews_analys(desarrollador_sent: str):
+    ''' Se ingresa un nombre de desarrollador y la función devuelve un diccionario con la cantidad de registros de reseñas de usuarios
+    con análisis de sentimientos, negativo o positivo'''
 
-
+    # Se filtra el DataFrame por el desarrollador dado
+    developer_data_sent = data_best_final[data_best_final["developer"] == desarrollador_sent]
+    # Se obtiene el recuento de análisis de sentimiento 0: negativo; 1: neutral, 2: positivo (si está ausente la reseña, es 1)
+    sentiment_counts = data_best_final["sentiment_analysis"].value_counts()
+    # Se prueba la salida con el conteo de sentimiento negativo o positivo
+    result_sent_desar = {desarrollador_sent: [f"Negativo = {sentiment_counts.get(0, 0)}", f"Positivo = {sentiment_counts.get(2, 0)}"]}
+    return result_sent_desar
 
 
 
