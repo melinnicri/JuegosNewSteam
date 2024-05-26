@@ -16,6 +16,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 # Usar datasets desde parquet (consultas)
 data_dev = pd.read_parquet("data_dev.parquet")
 data_user = pd.read_parquet("data_user.parquet")
+data_gen_final = pd.read_parquet("data_gen_final")
 piv_table_norm = pd.read_parquet("piv_table_norm.parquet")
 df_user_simil =pd.read_parquet("df_user_simil.parquet")
 cosine_sim_df = pd.read_parquet("cosine_sim_df.parquet")
@@ -37,32 +38,26 @@ async def about():
 
 
 # Primera consulta:
-@app.get("/developerinfo/({dev})")
-def developer_info(dev: str):
-    ''' Se ingresa el Desarrollador y la función retorna el Año, Cantidad de Items y Cantidad de Free en % '''
+@app.get("/infodeveloper/({desarrollador_normalizado})")
+def InfoDeveloper(desarrollador_normalizado : str):
+    '''Al ingresar el nombre de un Desarrollador, la función devuelve el Año, la cantidad de items Free y el porcentaje de éste.'''
 
     # Filtramos por el desarrollador que se ingrese
-    filter_data_dev = data_dev[data_dev["developer"] == dev]
-
-
-    # Se la cantidad de items por año
-    items_per_year = data_dev.groupby("year")["items_count"].count().to_dict()
+    filter_data_dev = data_dev[data_dev["developer"].str.lower() == desarrollador_normalizado]
+    # Cantidad de items por año
+    items_year = data_dev.groupby("year")["items_count"].count().to_dict()
+    # Calculamos la cantidad de contenido free por año
+    cantidad_free = data_dev[data_dev["price"] == 0.0].groupby("year")["items_count"].count().fillna(0).to_dict()
+    # Se calcula el porcentaje free, redondeado a un decimal
+    porcentaje_free = {year: f"{(cantidad_free.get(year, 0) / items_year.get(year, 1)) * 100:.1f}%" for year in items_year}
     
-    # Calculamos la cantidad de contenido free por año y convertimos a un diccionario
-    free_count = data_dev[data_dev["price"] == 0.0].groupby("year")["items_count"].count().fillna(0).to_dict()
-    
-    # Calculamos el porcentaje free
-    porcentaje_free = {year: (free_count.get(year, 0) / items_per_year.get(year, 1)) * 100 for year in items_per_year}
-    
-    developer_dict = {}
-    for year in items_per_year.keys():
-        year_int = int(year)
-        developer_dict[year_int] = {
-            "Agno": year,
-            "Cantidad de Items": items_per_year.get(year, 0),
-            f"% Free": round(porcentaje_free.get(year, 0), 1)
-        }
-    return developer_dict
+    # Formato de salida en JSON
+    output = {
+            "Agnos": items_year,
+            "Cantidad de items free": cantidad_free,
+            "Porcentaje free por agno": porcentaje_free
+            }
+    return output
 
 
 # Segunda consulta:
@@ -73,11 +68,11 @@ def UserData(User_id: str) -> dict:
     
     df_user_specific = data_user[data_user["user_id"] == User_id]
 
-    # Handle empty DataFrame gracefully
+    # Ver usuario
     if df_user_specific.empty:
         return {
             "Cantidad dinero gastado": None,
-            "% de Recomendación": None,
+            "Porcentaje de Recomendación": None,
             "Cantidad de items": None
         }
 
@@ -110,14 +105,84 @@ def UserData(User_id: str) -> dict:
     except IndexError:
         items_count = None
 
-    output = {
+    output_m = {
         "Usuario": User_id,
         "Cantidad dinero gastado en USD": total_spent,
         "Porc de Recomendación": f"{recommend_percentage:.1f}",
         "Cantidad de items": items_count
     }
 
-    return output
+    return output_m
+
+
+# Tercera Consulta:
+@app.get("/userforgenre/({genero})")
+def UserForGenre(genero: str):
+
+    ''' Se ingresa algún Género y la función devuelve el Usuario con más horas de juego acumuladas 
+        y la lista de horas de juego acumuladas por Año de Lanzamiento'''
+    
+    # Género si se introduce con minúscula, que funcione igual:
+    genre_data = data_gen_final[data_gen_final["genres"].str.lower() == genero]
+
+    # Verificar si el género está presente en el DataFrame
+    if genero not in data_gen_final["genres"].str.lower().unique():
+        return {"Error": f"El género '{genero}' no se encuentra en el conjunto de datos."}
+
+    # Calcular la suma total de horas jugadas por usuario y género
+    user_genre_playtime = data_gen_final.groupby(["user_id", "genres"])["playtime_forever"].sum().reset_index()
+
+  #1   # Encontrar el usuario que acumula más horas jugadas por género
+    max_playtime_per_genre = user_genre_playtime.loc[user_genre_playtime.groupby("genres")["playtime_forever"].idxmax()]
+
+  #2  # Calcular la suma total de horas jugadas por año y por usuario
+    playtime_per_year = data_gen_final.groupby(["user_id", "year_only"])["playtime_forever"].sum().reset_index()
+
+
+    # Crear una lista de diccionarios con años y horas jugadas para cada año
+    horas_por_agno = []
+
+    available_years = playtime_per_year.loc[playtime_per_year["user_id"] == max_playtime_per_genre, "year_only"].unique()
+
+    for year in available_years:
+        horas_año = playtime_per_year[(playtime_per_year["user_id"] == max_playtime_per_genre) & (playtime_per_year["year_only"] == year)]["playtime_forever"].sum()
+        if horas_año > 0:
+            horas_por_agno.append({'Año': int(year), 'Horas': int(horas_año)})
+
+        
+    # Construir el diccionario final
+    user_gnr_result = {
+        f"Usuario con más horas jugadas para Género {genero}": max_playtime_per_genre,
+        "Horas jugadas": horas_por_agno
+    }
+    return user_gnr_result
+
+
+
+
+# Cuarta Consulta:
+
+
+
+
+# Quinta Consulta:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
