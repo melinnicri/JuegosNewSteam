@@ -122,57 +122,57 @@ Si es un sistema de recomendación user-item:
 - def recomendacion_usuario(id de usuario): Ingresando el id de un usuario, deberíamos recibir una lista con 5 juegos recomendados para dicho usuario. 
 
 
-API: https://primer-proyecto-apis.onrender.com (Advertencia: funcionan 2 XD):
-Datos para ensayar en la API:
+* API: https://primer-proyecto-apis.onrender.com (Advertencia: funcionan 2 XD):
+- Datos para ensayar en la API:
 
-Los que sí funcionan, son:
-SIMILAR USER RECS 
-USER-ITEM, ingresando user_id:
-zomboy151
-xfluttersx
-wantmahbody
-3456457568
-19702316748
+- Los que sí funcionan, son:
+* SIMILAR USER RECS 
+* USER-ITEM, ingresando user_id:
+* zomboy151
+* xfluttersx
+* wantmahbody
+* 3456457568
+* 19702316748
 
-TOP DEVELOPER, ingresando año:
-2000
-2010
-2017
-2008
-2015
+* TOP DEVELOPER, ingresando año:
+* 2000
+* 2010
+* 2017
+* 2008
+* 2015
 
-no funcionan:
-DESARROLLADOR, ingresando nombre developer:
-Kotoshiro
-Secret Level SRL
-INGAME
-Bidoniera Games
-Laush Dmitriy Sergeevich
+- no funcionan:
+* DESARROLLADOR, ingresando nombre developer:
+* Kotoshiro
+* Secret Level SRL
+* INGAME
+* Bidoniera Games
+* Laush Dmitriy Sergeevich
 
-USER_ID, ingresando id de usuario:
-76561198048353577
-Leaf_Light_Moscow
-Moomfina
-76561198099905030
-bobjimmy007
+* USER_ID, ingresando id de usuario:
+* 76561198048353577
+* Leaf_Light_Moscow
+* Moomfina
+* 76561198099905030
+* bobjimmy007
 
-GÉNERO, ingresando género:
-Free to Play
-RPG
-Sports
-Adventure
-Racing
+* GÉNERO, ingresando género:
+* Free to Play
+* RPG
+* Sports
+* Adventure
+* Racing
 
-DESARROLLADOR SENT, ingresando un desarrollador:
-los mismos de arriba
+* DESARROLLADOR SENT, ingresando un desarrollador:
+* los mismos de arriba
 
-SIMILARES JUEGOS, ingresando id de ITEM (id de juego)
-ITEM-ITEM:
-242760
-22300 
-247430 
-70000 
-293180 
-10 	
+* SIMILARES JUEGOS, ingresando id de ITEM (id de juego)
+* ITEM-ITEM:
+* 242760
+* 22300 
+* 247430 
+* 70000 
+* 293180 
+* 10 	
 
 ### //FIN … _@v
